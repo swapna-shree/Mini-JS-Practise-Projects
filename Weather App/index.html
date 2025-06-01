@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="card">
+        <div class="search">
+            <input type="text" placeholder="Enter City " spellcheck="false">
+            <button> <img src="images/search.png"></button>
+        </div>
+        <div class="error">
+            <p>Invalid City Name</p>
+        </div>
+        <div class="pinned-section">
+            <h3>Pinned Cities</h3>
+            <div class="pinned-cities" id="pinnedCities"></div>
+        </div>
+        <div class="weather">
+            <img src="images/rain.png" class="weather-icon">
+            <h1 class="temp">22°C</h1>
+            <h2 class="city">Odisha</h2>
+            <div class="details">
+                <div class="col">
+                    <img src="images/humidity.png">
+                    <div>
+                        <p class="humidity">50%</p>
+                        <p>Humidity</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <img src="images/wind.png">
+                    <div>
+                        <p class="wind">15 km/hr</p>
+                        <p>Wind Speed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = "Your_API_KEY";
+        const apiUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
+
+        const searchBox = document.querySelector(".search input");
+        const searchBtn = document.querySelector(".search button");
+        const weatherIcon = document.querySelector(".weather-icon")
+        async function checkWeather(city) {
+            const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
+            if(response.status == 404){
+                document.querySelector(".error").style.display = "block";
+                document.querySelector(".weather").style.display = "none";
+            }
+            else{
+                const data = await response.json();
+
+
+                document.querySelector(".city").innerHTML = data.name;
+                document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°C";
+                document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+                document.querySelector(".wind").innerHTML = data.wind.speed + " km/hr";
+
+                if (data.weather[0].main == "Clouds") {
+                    weatherIcon.src = "images/clouds.png"
+                }
+                else if (data.weather[0].main == "Clear") {
+                    weatherIcon.src = "images/clear.png"
+                }
+                else if (data.weather[0].main == "Rain") {
+                    weatherIcon.src = "images/rain.png"
+                }
+                else if (data.weather[0].main == "Drizzle") {
+                    weatherIcon.src = "images/drizzle.png"
+                }
+                else if (data.weather[0].main == "Mist") {
+                    weatherIcon.src = "images/mist.png"
+                }
+                document.querySelector(".error").style.display = "none";
+                document.querySelector(".weather").style.display = "block";
+                addPinButton(data.name);
+            }
+            
+        }
+        function addPinButton(city) {
+                let existingBtn = document.getElementById("dynamicPinBtn");
+                if (existingBtn) {
+                    existingBtn.remove(); 
+                }
+
+                const weatherDiv = document.querySelector(".weather");
+                const pinBtn = document.createElement("button");
+                pinBtn.id = "dynamicPinBtn";
+                pinBtn.innerText = "📌 Pin " + city;
+                pinBtn.style.marginTop = "10px";
+                pinBtn.addEventListener("click", () => {
+                    pinCity(city);
+                });
+                weatherDiv.appendChild(pinBtn);
+            }
+
+        searchBox.addEventListener("keypress" , function(e) {
+            if(e.key === "Enter" && searchBox.value.trim() !== ""){
+                checkWeather(searchBox.value.trim());
+            }
+        });
+
+        searchBtn.addEventListener("click", () => {
+                if (searchBox.value.trim() !== "") {
+                    checkWeather(searchBox.value.trim());
+                }
+            });
+
+            function loadPinnedCities() {
+                    const pinned = JSON.parse(localStorage.getItem("pinnedCities")) || [];
+                    const container = document.getElementById("pinnedCities");
+                    container.innerHTML = "";
+
+                    pinned.forEach(city => {
+                        const cityDiv = document.createElement("div");
+                        cityDiv.classList.add("pinned-item");
+
+                        const btn = document.createElement("button");
+                        btn.innerText = city;
+                        btn.classList.add("pin-btn");
+                        btn.addEventListener("click", () => checkWeather(city));
+
+                        const unpin = document.createElement("span");
+                        unpin.innerText = "❌";
+                        unpin.style.cursor = "pointer";
+                        unpin.style.marginLeft = "8px";
+                        unpin.addEventListener("click", () => {
+                            unpinCity(city);
+                        });
+
+                        cityDiv.appendChild(btn);
+                        cityDiv.appendChild(unpin);
+                        container.appendChild(cityDiv);
+                    });
+                }
+          
+
+    function pinCity(city) {
+        let pinned = JSON.parse(localStorage.getItem("pinnedCities")) || [];
+        if (!pinned.includes(city)) {
+            pinned.push(city);
+            localStorage.setItem("pinnedCities", JSON.stringify(pinned));
+            loadPinnedCities();
+        }
+    }  
+    function unpinCity(city) {
+            let pinned = JSON.parse(localStorage.getItem("pinnedCities")) || [];
+            pinned = pinned.filter(c => c !== city);
+            localStorage.setItem("pinnedCities", JSON.stringify(pinned));
+            loadPinnedCities();
+        }
+     
+    
+        window.onload = function () {
+            loadPinnedCities();
+        };
+     
+
+    
+    </script>
+
+</body>
+
+</html>
