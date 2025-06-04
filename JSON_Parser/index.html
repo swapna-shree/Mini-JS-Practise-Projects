@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>JSON Parser</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <h1>JSON Parser</h1>
+    
+    <div class="json-container">
+        <div class="input-section">
+            <h3>Input JSON</h3>
+            <textarea id="json-input" placeholder="Paste raw JSON here"></textarea>
+        </div>
+    
+        <div class="output-section">
+            <h3>Formatted Output</h3>
+            <div id="json-output" class="json-view"></div>
+        </div>
+    </div>
+    
+    <div class="buttons">
+        <button onclick="formatJSON()">Format</button>
+        <button onclick="flatten()">Flatten</button>
+        <button onclick="unflatten()">Unflatten</button>
+    </div>
+    
+    <script src="script.js"></script>
+
+</body>
+
+</html>
